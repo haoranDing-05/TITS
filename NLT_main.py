@@ -11,16 +11,15 @@ def likelihood_transformation(X):
     for m in range(M):#通过内外两层循环遍历矩阵中的每一个元素
         for n in range(N):
             Y[m, n] = (1 / np.sqrt(2 * np.pi * sigma_m[m])) * np.exp(
-                -((X[m, n] - mu_m[m]) ** 2) / (2 * sigma_m[m])
+                -((X[m, n] - mu_m[m]) ** 2) / (2*sigma_m[m])
             )#该式为正态分布的概率密度函数 用于求出每一个元素的特征似然值
-
-    z = np.sum(Y, axis=0) / np.max(np.sum(Y, axis=0))#实现归一化 使得所有聚合似然值在经过归一化后范围在0-1之间
+        
+    z = np.sum(Y, axis=1) / np.max(np.sum(Y, axis=1))#实现归一化 使得所有聚合似然值在经过归一化后范围在0-1之间
     return z
 
 #以下为测试代码
 
-example_data = np.random.rand(5, 10)
-
-result = likelihood_transformation(example_data)
-print("归一化似然变换结果:")
-print(result)
+#example_data = np.random.rand(5, 10)
+#result = likelihood_transformation(example_data)
+#print("归一化似然变换结果:")
+#print(result)
