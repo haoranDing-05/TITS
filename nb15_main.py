@@ -2,7 +2,7 @@ from torch import nn, optim
 from torch.utils.data import random_split, DataLoader, ConcatDataset
 import torch
 from data_processing.timeseries_dataset import TimeSeriesDataset
-from module.LSTM import LSTMAutoencoder, train_model
+from model.LSTM import LSTMAutoencoder, train_model
 
 # setting
 batch_size = 50

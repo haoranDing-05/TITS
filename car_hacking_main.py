@@ -1,48 +1,62 @@
+import json
 import torch
 from torch import nn, optim
-from torch.utils.data import ConcatDataset, random_split, DataLoader
+from torch.utils.data import DataLoader
 
-from data_processing import car_hacking_process_data
-from data_processing.timeseries_dataset import TimeSeriesDataset
-from module.LSTM import LSTMAutoencoder, train_model
+from NLT.NLT_main import likelihood_transformation
+from data_processing.timeseries_dataset import loading_car_hacking, dataClassifier
+from model_test.CustomClass import SimpleConcatDataset
+from model_test.Custom_split import my_random_split
 
-# setting
-batch_size = 100
-hidden_size = 100
-epoch = 400
-window_size = 10
-input_size = 1
-num_layers = 2
+from model_test.grid_research import grid_research
+from model.LSTM import LSTMAutoencoder, train_model
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+if __name__ == '__main__':
+    # model setting
+    batch_size = 100
+    input_size = 1
+    num_layers = 2
+    hidden_size = 50
+    epoch = 500
+    window_size = 10
+    learning_rate = 0.001
+    sliding_window = 1
 
-normal_run_path = r'.\Car-Hacking Dataset\normal_run_data\normal_run_data.txt'
-DoS_dataset_path = r'.\Car-Hacking Dataset\DoS_dataset.csv'
-Fuzzy_dataset_path = r'.\Car-Hacking Dataset\Fuzzy_dataset.csv'
-RPM_dataset_path = r'.\Car-Hacking Dataset\RPM_dataset.csv'
-gear_dataset_path = r'.\Car-Hacking Dataset\gear_dataset.csv'
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model_file = 'car_hacking_model.pt'
 
-normal_run_dataset = TimeSeriesDataset(normal_run_path, window_size)
-DoS_dataset_dataset = TimeSeriesDataset(DoS_dataset_path, window_size)
-RPM_dataset_dataset = TimeSeriesDataset(RPM_dataset_path, window_size)
-gear_dataset_dataset = TimeSeriesDataset(gear_dataset_path, window_size)
-Fuzzy_dataset_dataset = TimeSeriesDataset(Fuzzy_dataset_path, window_size)
+    transfer = likelihood_transformation()
 
-print('数据读取完成')
+    # train_dataset = loading_car_hacking(window_size, sliding_window, transfer, 'train')
+    # normal_dataset, attack_dataset = dataClassifier(train_dataset)
+    #
+    # val_dataset = loading_car_hacking(window_size, sliding_window, transfer, 'test')
 
-car_hacking_dataset = ConcatDataset(
-    [normal_run_dataset, DoS_dataset_dataset, RPM_dataset_dataset, gear_dataset_dataset, Fuzzy_dataset_dataset])
+    data_set = loading_car_hacking(window_size, sliding_window, transfer, 'all')
 
-# car_hacking_dataset = normal_run_dataset
+    normal_dataset, attack_dataset = dataClassifier(data_set)
 
-train_size = int(0.8 * len(car_hacking_dataset))
-test_size = len(car_hacking_dataset) - train_size
-# 使用 random_split 函数将数据集分割成训练集和测试集
-train_dataset, test_dataset = random_split(car_hacking_dataset, [train_size, test_size])
-train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size, shuffle=True)
+    train_size = int(0.8 * len(normal_dataset))
+    test_size = len(normal_dataset) - train_size
+    train_normal_dataset, test_norma_dataset = my_random_split(normal_dataset, [train_size, test_size])
 
-model = LSTMAutoencoder(input_size, hidden_size, num_layers)
-criterion = nn.L1Loss()
-optimizer = optim.SGD(model.parameters(), lr=0.001)
-train_model(model, train_loader, test_loader, criterion, optimizer, epoch, device)
+    train_size = int(0.8 * len(attack_dataset))
+    test_size = len(attack_dataset) - train_size
+    train_attack_dataset, test_attack_dataset = my_random_split(attack_dataset, [train_size, test_size])
+    test_dataset = SimpleConcatDataset([test_norma_dataset, test_attack_dataset])
+
+    model = LSTMAutoencoder(input_size, hidden_size, device)
+    print("training model")
+    train_loader = DataLoader(normal_dataset, batch_size, shuffle=True)
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = train_model(model, train_loader, criterion, optimizer, epoch, device)
+    torch.save(model.state_dict(), model_file)
+    print('training Done')
+
+    grid = grid_research(test_dataset, model)
+    grid.append(transfer.get_global_max())
+    file_path = 'grid.json'
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(grid, f, ensure_ascii=False, indent=2)
+    print(f"参数已保存 {grid}")
