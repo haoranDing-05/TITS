@@ -105,8 +105,8 @@ def progress_bar(progress, total, bar_length=50):
 
 
 if __name__ == '__main__':
-    file_path_txt = r'../Car-Hacking Dataset/normal_run_data/normal_run_data.txt'
-    file_path_csv = r"..\Car-Hacking Dataset\gear_dataset.csv"
+    file_path_txt = r'..\data\Car-Hacking Dataset\normal_run_data\normal_run_data.txt'
+    file_path_csv = r"..\data\Car-Hacking Dataset\gear_dataset.csv"
     feature, label = car_hacking_process_data(file_path_csv,0.05)
     print(len(label))
     print(label)

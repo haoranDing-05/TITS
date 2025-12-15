@@ -72,18 +72,18 @@ class TimeSeriesDataset(Dataset):
 def loading_car_hacking(window_size, sliding_window, transfer, mode):
     from data_processing.car_hacking_process_data import car_hacking_process_data
     
-    normal_run_path = rf'..\Car-Hacking Dataset 2-8\{mode}\normal_run_data.txt'
-    DoS_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\DoS_dataset.csv'
-    Fuzzy_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\Fuzzy_dataset.csv'
-    RPM_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\RPM_dataset.csv'
-    gear_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\gear_dataset.csv'
+    normal_run_path = rf'..\data\Car-Hacking Dataset 2-8\{mode}\normal_run_data.txt'
+    DoS_dataset_path = rf'..\data\Car-Hacking Dataset 2-8\{mode}\DoS_dataset.csv'
+    Fuzzy_dataset_path = rf'..\data\Car-Hacking Dataset 2-8\{mode}\Fuzzy_dataset.csv'
+    RPM_dataset_path = rf'..\data\Car-Hacking Dataset 2-8\{mode}\RPM_dataset.csv'
+    gear_dataset_path = rf'..\data\Car-Hacking Dataset 2-8\{mode}\gear_dataset.csv'
 
     if mode == 'all':
-        normal_run_path = rf'.\Car-Hacking Dataset\normal_run_data\normal_run_data.txt'
-        DoS_dataset_path = rf'.\Car-Hacking Dataset\DoS_dataset.csv'
-        Fuzzy_dataset_path = rf'.\Car-Hacking Dataset\Fuzzy_dataset.csv'
-        RPM_dataset_path = rf'.\Car-Hacking Dataset\RPM_dataset.csv'
-        gear_dataset_path = rf'.\Car-Hacking Dataset\gear_dataset.csv'
+        normal_run_path = rf'.\data\Car-Hacking Dataset\normal_run_data\normal_run_data.txt'
+        DoS_dataset_path = rf'.\data\Car-Hacking Dataset\DoS_dataset.csv'
+        Fuzzy_dataset_path = rf'.\data\Car-Hacking Dataset\Fuzzy_dataset.csv'
+        RPM_dataset_path = rf'.\data\Car-Hacking Dataset\RPM_dataset.csv'
+        gear_dataset_path = rf'.\data\Car-Hacking Dataset\gear_dataset.csv'
 
     file_path = [normal_run_path, DoS_dataset_path, Fuzzy_dataset_path, RPM_dataset_path, gear_dataset_path]
     car_hacking_dataset = TimeSeriesDataset(file_path, window_size, sliding_window, transfer, car_hacking_process_data)
