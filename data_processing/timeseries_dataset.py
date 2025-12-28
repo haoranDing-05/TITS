@@ -2,28 +2,27 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from data_processing.car_hacking_process_data import car_hacking_process_data
 from model_test.CustomClass import SimpleSubset
 
 
 # 将特征提取后的数据转变为可供训练的Dataset类
 class TimeSeriesDataset(Dataset):
-    def __init__(self, file_path, window_size, sliding_window, transfer):
+    def __init__(self, file_path, window_size, sliding_window, transfer, process_func):
         features = None
         label = []
         for path in file_path:
             print(f"loading {path}")
             if features is None:
-                features, label = car_hacking_process_data(path, sliding_window)
+                features, label = process_func(path, sliding_window)
             else:
-                feature, labels = car_hacking_process_data(path, sliding_window)
+                feature, labels = process_func(path, sliding_window)
                 features = np.concatenate([features, feature], axis=0)
                 label = np.concatenate([label, labels], axis=0)
         features = np.array(features)
         label = np.array(label)
 
         features = transfer.out(features)
-
+        
         # 数据预处理可视化
         from matplotlib import pyplot as plt
         import os
@@ -71,6 +70,8 @@ class TimeSeriesDataset(Dataset):
 
 
 def loading_car_hacking(window_size, sliding_window, transfer, mode):
+    from data_processing.car_hacking_process_data import car_hacking_process_data
+    
     normal_run_path = rf'..\Car-Hacking Dataset 2-8\{mode}\normal_run_data.txt'
     DoS_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\DoS_dataset.csv'
     Fuzzy_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\Fuzzy_dataset.csv'
@@ -83,12 +84,46 @@ def loading_car_hacking(window_size, sliding_window, transfer, mode):
         Fuzzy_dataset_path = rf'.\Car-Hacking Dataset\Fuzzy_dataset.csv'
         RPM_dataset_path = rf'.\Car-Hacking Dataset\RPM_dataset.csv'
         gear_dataset_path = rf'.\Car-Hacking Dataset\gear_dataset.csv'
-
+    # file_path = [normal_run_path]
     file_path = [normal_run_path, DoS_dataset_path, Fuzzy_dataset_path, RPM_dataset_path, gear_dataset_path]
-    car_hacking_dataset = TimeSeriesDataset(file_path, window_size, sliding_window, transfer)
+    car_hacking_dataset = TimeSeriesDataset(file_path, window_size, sliding_window, transfer, car_hacking_process_data)
 
     return car_hacking_dataset
 
+def loading_survival_dataset(window_size, sliding_window, transfer, mode):
+    from data_processing.survival_process_data import survival_process_data
+    import os
+    
+    # 获取项目根目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    data_dir = os.path.join(project_root, 'data', 'survival')
+    
+    # 正常数据路径
+    freedriving_path = os.path.join(data_dir, 'FreeDriving_dataset_concat.txt')
+    
+    # 攻击数据路径
+    flooding_path = os.path.join(data_dir, 'Flooding_dataset_concat.txt')
+    fuzzy_path = os.path.join(data_dir, 'Fuzzy_dataset_concat.txt')
+    malfunction_path = os.path.join(data_dir, 'Malfunction_dataset_concat.txt')
+    
+    # 根据mode选择文件
+    if mode == 'all':
+        # 使用所有数据
+        file_path = [freedriving_path, flooding_path, fuzzy_path, malfunction_path]
+    elif mode == 'normal':
+        # 只使用正常数据
+        file_path = [freedriving_path]
+    elif mode == 'attack':
+        # 只使用攻击数据
+        file_path = [flooding_path, fuzzy_path, malfunction_path]
+    else:
+        # 默认使用所有数据
+        file_path = [freedriving_path, flooding_path, fuzzy_path, malfunction_path]
+    
+    survival_dataset = TimeSeriesDataset(file_path, window_size, sliding_window, transfer, survival_process_data)
+    
+    return survival_dataset
 
 def dataClassifier(dataset):
     # for i in range(len(dataset)):

@@ -1,8 +1,16 @@
 import time
 from collections import deque
+import sys
+import os
 
 import numpy as np
 import pandas as pd
+
+# 添加项目根目录到路径，以便导入模块
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 #from data_processing.car_queue import TimeSlidingWindow
 from data_processing.new2_car_queue import StrideNode, CarQueue
@@ -105,8 +113,16 @@ def progress_bar(progress, total, bar_length=50):
 
 
 if __name__ == '__main__':
-    file_path_txt = r'../Car-Hacking Dataset/normal_run_data/normal_run_data.txt'
-    file_path_csv = r"..\Car-Hacking Dataset\gear_dataset.csv"
-    feature, label = car_hacking_process_data(file_path_csv,0.05)
-    print(len(label))
-    print(label)
+    # 基于脚本所在目录计算相对路径
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    
+    # 使用data目录下的文件
+    file_path_txt = os.path.join(project_root, 'data', 'Car-Hacking Dataset', 'Car-Hacking Dataset', 'normal_run_data', 'normal_run_data.txt')
+    file_path_csv = os.path.join(project_root, 'data', 'Car-Hacking Dataset', 'Car-Hacking Dataset', 'gear_dataset.csv')
+    
+    print("测试CSV格式数据:")
+    feature, label = car_hacking_process_data(file_path_csv)
+    if feature is not None:
+        print(f"特征数量: {len(feature)}, 标签数量: {len(label)}")
+        print(f"前5个标签: {label[:5] if len(label) >= 5 else label}")

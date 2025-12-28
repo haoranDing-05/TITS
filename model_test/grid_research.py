@@ -200,7 +200,7 @@ def grid_research(test_subset, model):
         result["gmean"][4], result["gmean"][5], result["gmean"][0], result["gmean"][1], result["gmean"][2],
         result["gmean"][3]))
 
-    return [result["accuracy"][5], result["f1"][5],result["gmean"][5]]
+    return [result["accuracy"][4], result["f1"][4], result["gmean"][4], result["f1"][5]]
 
 
 def show_Loss(loss, labels):
