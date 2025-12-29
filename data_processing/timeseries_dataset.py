@@ -71,20 +71,31 @@ class TimeSeriesDataset(Dataset):
 
 def loading_car_hacking(window_size, sliding_window, transfer, mode):
     from data_processing.car_hacking_process_data import car_hacking_process_data
-    
-    normal_run_path = rf'..\Car-Hacking Dataset 2-8\{mode}\normal_run_data.txt'
-    DoS_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\DoS_dataset.csv'
-    Fuzzy_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\Fuzzy_dataset.csv'
-    RPM_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\RPM_dataset.csv'
-    gear_dataset_path = rf'..\Car-Hacking Dataset 2-8\{mode}\gear_dataset.csv'
+    import os
+
+    # 1. 获取项目根目录 (无论你在哪里运行，这行都能找到 TITS 文件夹的绝对路径)
+    # 假设 timeseries_dataset.py 在 TITS/data_processing/ 下，需要往上走两层或者根据实际位置调整
+    # 如果这个文件在根目录，用 os.path.dirname(os.path.abspath(__file__)) 即可
+    # 如果文件在 data_processing 文件夹内：
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_file_dir)  # 假设上一级就是根目录
+
+    # 如果这个文件本身就在根目录（看你上传的结构似乎是的），那就直接用：
+    # project_root = os.path.dirname(os.path.abspath(__file__))
+
+    # 2. 拼接正确路径
+    dataset_folder = os.path.join(project_root, 'Car-Hacking Dataset')
 
     if mode == 'all':
-        normal_run_path = rf'.\Car-Hacking Dataset\normal_run_data\normal_run_data.txt'
-        DoS_dataset_path = rf'.\Car-Hacking Dataset\DoS_dataset.csv'
-        Fuzzy_dataset_path = rf'.\Car-Hacking Dataset\Fuzzy_dataset.csv'
-        RPM_dataset_path = rf'.\Car-Hacking Dataset\RPM_dataset.csv'
-        gear_dataset_path = rf'.\Car-Hacking Dataset\gear_dataset.csv'
-    # file_path = [normal_run_path]
+        normal_run_path = os.path.join(dataset_folder, 'normal_run_data', 'normal_run_data.txt')
+        DoS_dataset_path = os.path.join(dataset_folder, 'DoS_dataset.csv')
+        Fuzzy_dataset_path = os.path.join(dataset_folder, 'Fuzzy_dataset.csv')
+        RPM_dataset_path = os.path.join(dataset_folder, 'RPM_dataset.csv')
+        gear_dataset_path = os.path.join(dataset_folder, 'gear_dataset.csv')
+    else:
+        # 处理其他 mode 的逻辑，建议也统一用 os.path.join
+        pass
+
     file_path = [normal_run_path, DoS_dataset_path, Fuzzy_dataset_path, RPM_dataset_path, gear_dataset_path]
     car_hacking_dataset = TimeSeriesDataset(file_path, window_size, sliding_window, transfer, car_hacking_process_data)
 
@@ -135,3 +146,12 @@ def dataClassifier(dataset):
     normal_dataset = SimpleSubset(dataset, indices_1)
 
     return normal_dataset, attack_dataset
+
+
+if __name__ == '__main__':
+    from NLT.NLT_main import likelihood_transformation
+    window_size = 10
+    sliding_window = 0.05
+    transfer = likelihood_transformation()
+    ch_data = loading_car_hacking(window_size, sliding_window, transfer, 'all')
+    print(type(ch_data))

@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="pytorch_env_TITS" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (TITS)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="TITS" project-jdk-type="Python SDK" />
 </project>
